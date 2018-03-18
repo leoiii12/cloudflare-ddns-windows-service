@@ -40,9 +40,9 @@ namespace CloudflareDDNS
                     SetRecoveryOptions(sc.ServiceName);
                 }
             }
-            catch (Exception e1)
+            catch (Exception ee)
             {
-                EventLog.WriteEntry("Application", e1.ToString(), EventLogEntryType.Error);
+                EventLog.WriteEntry("Application", ee.ToString(), EventLogEntryType.Error);
             }
         }
 

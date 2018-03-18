@@ -20,6 +20,7 @@ namespace CloudflareDDNS.Cloudflare
             _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
             _httpClient.DefaultRequestHeaders.Add("X-Auth-Email", email);
             _httpClient.DefaultRequestHeaders.Add("X-Auth-Key", apiKey);
+            _httpClient.Timeout = TimeSpan.FromSeconds(30.0);
         }
 
         public async Task<IReadOnlyCollection<Zone>> GetAllZonesAsync()

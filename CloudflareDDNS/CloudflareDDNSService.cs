@@ -55,23 +55,11 @@ namespace CloudflareDDNS
 
                 ValidateIpAddress(currentIpAddress);
 
-                // Initialize _lastIpAddress and 
-                // Sync to make sure all DNS records are synchronized at the beginning
-                if (_lastIpAddress == null)
-                {
-                    await SyncAllDnsRecords(currentIpAddress);
-                    _lastIpAddress = currentIpAddress;
-
-                    return;
-                }
-
-                // Detect change
-                var ipAddressChanged = _lastIpAddress != currentIpAddress;
-
-                // Not changed, then do nothing
-                if (!ipAddressChanged) return;
-
-                _log.WriteLine($"New ip address, {currentIpAddress}");
+                // unchanged -> return
+                if (_lastIpAddress != null && _lastIpAddress == currentIpAddress) return;
+                
+                if (_lastIpAddress != null) 
+                    _log.WriteLine($"New ip address, {currentIpAddress}");
 
                 await SyncAllDnsRecords(currentIpAddress);
                 _lastIpAddress = currentIpAddress;
@@ -109,7 +97,7 @@ namespace CloudflareDDNS
             var updatingDnsRecords = allDnsARecords.Where(adarr => adarr.content != currentIpAddress).ToList();
             foreach (var updatingDnsRecord in updatingDnsRecords)
             {
-                var dnsRecord = await _cloudflareApi.UpdateDnsRecordAsync(
+                var updatedDnsRecord = await _cloudflareApi.UpdateDnsRecordAsync(
                     updatingDnsRecord.zone_id, updatingDnsRecord.id,
                     updatingDnsRecord.name, currentIpAddress, updatingDnsRecord.ttl, updatingDnsRecord.proxied);
             }
@@ -117,7 +105,7 @@ namespace CloudflareDDNS
             if (updatingDnsRecords.Any())
             {
                 var updatedDnsRecordNames = updatingDnsRecords.Select(udr => udr.name).ToList();
-                _log.WriteLine($"All records have been updated. {string.Join(", ", updatedDnsRecordNames)}");
+                _log.WriteLine($"All records have been synced. {string.Join(", ", updatedDnsRecordNames)}");
             }
         }
 
