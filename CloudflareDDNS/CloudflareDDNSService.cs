@@ -15,7 +15,7 @@ namespace CloudflareDDNS
     public partial class CloudflareDDNSService : ServiceBase
     {
         private readonly CloudflareApi _cloudflareApi;
-        private readonly HttpClient _httpClient = new HttpClient();
+        private readonly HttpClient _httpClient;
         private readonly ILog _log;
         private string _lastIpAddress;
         private Timer _timer;
@@ -24,8 +24,12 @@ namespace CloudflareDDNS
         {
             InitializeComponent();
 
-            _log = log;
             _cloudflareApi = new CloudflareApi(ConfigurationManager.AppSettings["api_key"], ConfigurationManager.AppSettings["email"]);
+            _httpClient = new HttpClient
+            {
+                Timeout = TimeSpan.FromSeconds(30.0)
+            };
+            _log = log;
         }
 
         protected override void OnStart(string[] args)
@@ -57,8 +61,8 @@ namespace CloudflareDDNS
 
                 // unchanged -> return
                 if (_lastIpAddress != null && _lastIpAddress == currentIpAddress) return;
-                
-                if (_lastIpAddress != null) 
+
+                if (_lastIpAddress != null)
                     _log.WriteLine($"New ip address, {currentIpAddress}");
 
                 await SyncAllDnsRecords(currentIpAddress);
