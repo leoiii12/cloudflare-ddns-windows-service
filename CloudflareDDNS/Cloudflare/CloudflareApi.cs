@@ -16,7 +16,7 @@ namespace CloudflareDDNS.Cloudflare
         public CloudflareApi(string apiKey, string email)
         {
             _httpClient = new HttpClient();
-            _httpClient.Timeout = TimeSpan.FromSeconds(30.0);
+            _httpClient.Timeout = TimeSpan.FromSeconds(120d);
             _httpClient.BaseAddress = new Uri("https://api.cloudflare.com/client/v4/");
             _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
             _httpClient.DefaultRequestHeaders.Add("X-Auth-Email", email);

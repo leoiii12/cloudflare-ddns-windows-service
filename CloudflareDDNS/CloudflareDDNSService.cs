@@ -25,16 +25,15 @@ namespace CloudflareDDNS
             InitializeComponent();
 
             _cloudflareApi = new CloudflareApi(ConfigurationManager.AppSettings["api_key"], ConfigurationManager.AppSettings["email"]);
-            _httpClient = new HttpClient
-            {
-                Timeout = TimeSpan.FromSeconds(30.0)
-            };
+            _httpClient = new HttpClient();
+            _httpClient.Timeout = TimeSpan.FromSeconds(120d);
+            _httpClient.BaseAddress = new Uri("http://checkip.amazonaws.com");
             _log = log;
         }
 
         protected override void OnStart(string[] args)
         {
-            _timer = new Timer(60 * 1000D); // 60000 milliseconds = 60 seconds
+            _timer = new Timer(240 * 1000D); // 240,000 milliseconds = 240 seconds
             _timer.AutoReset = true;
             _timer.Elapsed += TimerElasped;
 
@@ -53,7 +52,7 @@ namespace CloudflareDDNS
         {
             try
             {
-                var httpResponseMessage = await _httpClient.GetAsync("http://checkip.amazonaws.com");
+                var httpResponseMessage = await _httpClient.GetAsync("");
                 var output = await httpResponseMessage.Content.ReadAsStringAsync();
                 var currentIpAddress = Regex.Replace(output, @"\t|\n|\r", string.Empty);
 
